@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import pwd
+import re
 import shlex
 import signal
 import subprocess
@@ -12,6 +13,38 @@ import sys
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
+
+CONF_LINE = re.compile(r'^[A-Z_]+=[^\s"\']+$')
+
+
+def load_autonomy_conf(path=None):
+    """Parse autonomy.conf into a dict of KEY -> raw string value.
+
+    Blank lines and lines starting with '#' are skipped. Every remaining line
+    must match ^[A-Z_]+=[^\\s"']+$ and is split on its first '='.
+
+    Args:
+        path: Optional path to the config file; defaults to autonomy.conf
+            next to this module.
+
+    Returns:
+        Dict mapping each KEY to its value as a string.
+
+    Raises:
+        ValueError: If a non-comment line does not match the expected format.
+    """
+    path = Path(path) if path is not None else Path(__file__).parent / 'autonomy.conf'
+    values = {}
+    for number, line in enumerate(path.read_text().splitlines(), start=1):
+        if not line or line.startswith('#'):
+            continue
+        if not CONF_LINE.match(line):
+            raise ValueError(f'{path}:{number}: invalid autonomy.conf line {line!r}; '
+                             'expected KEY=value with no quotes or whitespace')
+        key, value = line.split('=', 1)
+        values[key] = value
+    return values
+
 
 BASE = Path('/home/web/seaparser/autonomy')
 WORK = Path('/home/web/seaparser/worktrees/real-map-data')
