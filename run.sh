@@ -3,10 +3,24 @@ set -euo pipefail
 umask 077
 # Shared constants (BASE, WORKDIR, CODEX, ...) live in autonomy.conf next to
 # this script. Refuse to run without it rather than falling back to defaults.
-CONF="$(dirname -- "${BASH_SOURCE[0]}")/autonomy.conf"
+# Resolve symlinks first so a run.sh invoked via a symlink still finds the
+# autonomy.conf that sits next to the real script. A failed readlink must not
+# abort silently under set -e; report it explicitly instead.
+if ! SELF="$(readlink -f -- "${BASH_SOURCE[0]}")" || [[ -z $SELF ]]; then
+    echo "FEL: kunde inte lösa upp sökvägen till ${BASH_SOURCE[0]}" >&2
+    exit 64
+fi
+CONF="$(dirname -- "$SELF")/autonomy.conf"
+# Trust model: autonomy.conf is sourced below, which executes shell code as
+# the run user. The file must therefore be owned by the run user and must not
+# be group- or world-writable, and its directory must be trusted as well (a
+# writable directory lets another user swap the file). These ownership and
+# permission requirements are documented only; they are not checked at
+# runtime, so keep them true when deploying.
 if [[ ! -f "$CONF" || ! -r "$CONF" ]]; then
     echo "FEL: $CONF saknas eller är inte läsbar" >&2
-    exit 78
+    # 64 (EX_USAGE) for config errors; 78 is reserved for missing handoff.session.
+    exit 64
 fi
 # shellcheck source=autonomy.conf
 . "$CONF"
