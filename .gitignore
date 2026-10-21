@@ -24,3 +24,8 @@ __pycache__/
 .agents/
 .aws/
 .codex/
+
+# Autonomous runner working files
+AUTONOMOUS_TASK.md
+RUN_HISTORY.json
+RUN_REPORT_*.md

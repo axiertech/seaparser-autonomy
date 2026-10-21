@@ -132,3 +132,17 @@ Tre `flock`-baserade lås används, alla kraschsäkra:
 
 Låsfilerna är tomma och skapas automatiskt av `open('a')`. De får inte tas bort
 manuellt medan en process kör – `flock` släpper dem automatiskt vid processdöd.
+
+## Editing autonomy itself with the autonomous runner
+
+The SeaParser runner (`~/app/scripts/runner.py`) supports `--root autonomy`.
+It creates a worktree of this repo and lets DeepSeek edit the scripts.
+
+Prepare a task in `~/autonomy/AUTONOMOUS_TASK.md` and run:
+
+    cd ~/app && source .venv/bin/activate
+    .venv/bin/python -B -m scripts.runner --root autonomy --fast
+
+Verify and merge with:
+
+    .venv/bin/python -B -m scripts.verify_run --root autonomy <date>_<n> --fast
