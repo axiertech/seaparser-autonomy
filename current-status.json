@@ -1,0 +1,199 @@
+{
+  "verified_at": "2026-10-17T17:42:46.667956+00:00",
+  "workdir": "/tmp/seaparser-real-map-data",
+  "branch": "development/real-map-data",
+  "commit": "2e0e0f85d20af2e80c0b0470b4769a55dd17793a",
+  "local_changes": "",
+  "other_worktree_local_changes": "M docs/progress.md",
+  "verified_ci": [
+    {
+      "commit": "e0e61a844a3c8d0fbacc924cc6012ba971b2ef79",
+      "run_id": 38351219008,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/axiertech/seaparser/actions/runs/38351219008"
+    },
+    {
+      "commit": "bd5600c602a8896dbfbcf6b185729ce44483d2e4",
+      "run_id": 38352015238,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/axiertech/seaparser/actions/runs/38352015238"
+    },
+    {
+      "commit": "e117b3bc90e798dfd6416ebf681636bbe1f53e8f",
+      "run_id": 38683145661,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/axiertech/seaparser/actions/runs/38683145661",
+      "verification_source": "user-provided verified CI result"
+    },
+    {
+      "id": 38911808434,
+      "head_sha": "84cb7bd80056d54756d8796427652d41cb3fc462",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/axiertech/seaparser/actions/runs/38911808434",
+      "commit": "84cb7bd80056d54756d8796427652d41cb3fc462"
+    },
+    {
+      "commit": "8de1620556373440d70aa2b9902d71064222e536",
+      "run_id": 39028617503,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/axiertech/seaparser/actions/runs/39028617503"
+    },
+    {
+      "commit": "2e0e0f85d20af2e80c0b0470b4769a55dd17793a",
+      "run_id": 39054592940,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/axiertech/seaparser/actions/runs/39054592940"
+    }
+  ],
+  "files": [
+    {
+      "product": "waves",
+      "dataset_id": "cmems_mod_bal_wav_anfc_PT1H-i",
+      "version": "202311",
+      "part": "default",
+      "service": "arco-geo-series",
+      "filename": "waves.nc",
+      "sha256": "19150fc84c94e44138588776a7afefe95721615bcae5d3abdfc211a8dc956c5e",
+      "retrieved_at": "2026-10-13T04:51:54.535589+00:00",
+      "source_url": "https://data.marine.copernicus.eu/product/BALTICSEA_ANALYSISFORECAST_WAV_003_010/description",
+      "license_url": "https://marine.copernicus.eu/user-corner/service-commitments-and-license"
+    },
+    {
+      "product": "current",
+      "dataset_id": "cmems_mod_bal_phy_anfc_PT1H-i",
+      "version": "202411",
+      "part": "default",
+      "service": "arco-geo-series",
+      "filename": "current.nc",
+      "sha256": "b2372937e0840a5a58216fd9db7cadf044390fb332f1f8a8d6cd0d6b2cb230f1",
+      "retrieved_at": "2026-10-13T04:52:20.863569+00:00",
+      "source_url": "https://data.marine.copernicus.eu/product/BALTICSEA_ANALYSISFORECAST_PHY_003_006/description",
+      "license_url": "https://marine.copernicus.eu/user-corner/service-commitments-and-license"
+    },
+    {
+      "product": "static",
+      "dataset_id": "cmems_mod_bal_wav_anfc_static",
+      "version": "202311",
+      "part": "bathy",
+      "service": "static-arco",
+      "filename": "wave-mask.nc",
+      "sha256": "0df1bbd2a4676f4178beb1d44673d38059665d6534b6366a8939f99b0701030c",
+      "retrieved_at": "2026-10-13T05:01:25.850062+00:00",
+      "source_url": "https://data.marine.copernicus.eu/product/BALTICSEA_ANALYSISFORECAST_WAV_003_010/description",
+      "license_url": "https://marine.copernicus.eu/user-corner/service-commitments-and-license"
+    }
+  ],
+  "data_decision": "Reuse verified existing bundle; no repeated extraction",
+  "routing_status": "development_conditional_on_assumptions",
+  "blockers": [
+    "source_issue_time_and_historical_run_binding_unverified",
+    "cross_product_model_run_compatibility_unverified",
+    "source_masks_frames_and_time_semantics_partly_assumed"
+  ],
+  "local_tests": {
+    "prototype": 166,
+    "other": 318,
+    "total": 484,
+    "targeted_domain": 4,
+    "targeted_motion_publication": 7,
+    "dom": "passed",
+    "frontend_local": "map environment blocked",
+    "ci_full_suite": "success",
+    "log": "/tmp/seaparser-motion-full-check.log"
+  },
+  "metadata_report": "/home/web/seaparser/autonomy/forecast-metadata-probe-20261013/report.json",
+  "metadata_attempt_exit": 2,
+  "next_task": "Recovery complete; no further backlog work authorized in this recovery",
+  "autonomy_status": "recovery_complete; no_new_autonomous_run",
+  "work_session_started": false,
+  "ssh_persistence_verified": true,
+  "preparation_session_id": "01a1338f-97d4-7b61-aa78-5fdff31d1f89",
+  "tmux_socket": "/home/web/seaparser/autonomy/tmux.sock",
+  "tmux_socket_exists": false,
+  "handoff_gate_created": false,
+  "forecast_development_gate": "existing_real_codex_probe_verified; explicit work start pending",
+  "autonomy_probe": {
+    "expected_commit": "bd5600c602a8896dbfbcf6b185729ce44483d2e4",
+    "workdir": "/tmp/seaparser-real-map-data",
+    "command": "bash /home/web/seaparser/autonomy/start-probe.sh",
+    "log": "/home/web/seaparser/autonomy/logs/ssh-probe-bd5600c/latest.log",
+    "result": "/home/web/seaparser/autonomy/logs/ssh-probe-bd5600c/latest.json",
+    "status": "passed",
+    "local_lifecycle_verified": true,
+    "ssh_persistence_verified": true,
+    "launch_context": "PuTTY SSH followed by su - seaparser",
+    "disconnect": "manual PuTTY close; no automatic termination",
+    "observation": "origin terminal closed"
+  },
+  "five_hour_pass": {
+    "status": "prepared_not_started",
+    "workdir": "/tmp/seaparser-real-map-data",
+    "initial_commit": "8de1620556373440d70aa2b9902d71064222e536",
+    "session_id": null,
+    "model": "gpt-6.1-sol",
+    "saved_auth": "ChatGPT login status verified; new backend turn/usage not exercised",
+    "budget_seconds": 18000,
+    "actual_start": null,
+    "end_at": null,
+    "start_command": "bash /home/web/seaparser/autonomy/start-work.sh",
+    "stop_command": "bash /home/web/seaparser/autonomy/stop-work.sh",
+    "log_directory": "/home/web/seaparser/autonomy/logs/work-five-hours/latest",
+    "codex_process_started": false,
+    "last_failed_exit_code": 2,
+    "failure_cause": "Mutually exclusive --sandbox and --approve-for-me arguments; fixed by retaining only --approve-for-me",
+    "probe_command": "bash /home/web/seaparser/autonomy/start-work.sh --probe",
+    "real_codex_probe_verified": true,
+    "local_probe_exit_code": 1,
+    "local_probe_blocker": "Managed environment blocks tmux socket access and writes to Codex home",
+    "session_policy": "new exec on first turn; capture thread.started and resume only that ID on later turns",
+    "preparation_session_resume_forbidden": true,
+    "local_probe_log_directory": "/home/web/seaparser/autonomy/logs/codex-start-probe/20261013T213149Z-2",
+    "policy_version": "capacity-retry-v1",
+    "capacity_retry_delays_seconds": [
+      60,
+      180,
+      600
+    ],
+    "preflight_verified_at": "2026-10-16T08:00:00.102926+00:00",
+    "shared_lock_available_at_preflight": true,
+    "real_codex_probe_commit": "fa8cebf056a9e701ddca37082ea7c9d9b9cbc2bf",
+    "real_codex_probe_log_directory": "/home/web/seaparser/autonomy/logs/codex-start-probe/20261013T213956Z-258542",
+    "last_launch_attempt": "/home/web/seaparser/autonomy/logs/work-five-hours/20261016T143239Z-2",
+    "last_launch_failure": "tmux socket: Operation not permitted in managed environment",
+    "prior_deadline_applies": false,
+    "priorities": [
+      "more route candidates and departures with measured budgets",
+      "larger geographic and forecast coverage",
+      "graphical fastest versus most comfortable comparison"
+    ],
+    "model_free_final_receipt": "runner-summary.json and fallback final-report.md written by worker on termination"
+  },
+  "recovery_report": "/home/web/seaparser/autonomy/logs/motion-recovery-20261017/final-report.json",
+  "recovery_delivery": {
+    "commit": "84cb7bd80056d54756d8796427652d41cb3fc462",
+    "push": "remote branch SHA verified through authenticated GitHub",
+    "ci_run": 38911808434,
+    "ci_conclusion": "success",
+    "ci_url": "https://github.com/axiertech/seaparser/actions/runs/38911808434"
+  },
+  "review_report": "/home/web/seaparser/autonomy/REVIEW-8de1620.md",
+  "source_qualification": "unverified",
+  "result_qualification": "conditional_on_assumptions",
+  "review_verification": "/home/web/seaparser/autonomy/review-verification.json",
+  "publication": {
+    "url": "https://seaparser.com/vinga-ruttjamforelse-ramar.html",
+    "commit": "2e0e0f85d20af2e80c0b0470b4769a55dd17793a",
+    "sha256": "673eeb6086e8693dc548797251678cf2c2f6df7e0b421ab9a2fc5e799a5c7ba4",
+    "existing_public_content_unchanged": true,
+    "published": true,
+    "https_verified": true,
+    "https_status": 200,
+    "https_sha256": "673eeb6086e8693dc548797251678cf2c2f6df7e0b421ab9a2fc5e799a5c7ba4"
+  }
+}

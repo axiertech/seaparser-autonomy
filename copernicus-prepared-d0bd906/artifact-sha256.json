@@ -1,0 +1,10 @@
+{
+  "README.md": "9bd55067421e4d8ece905b8925f5e723d3dba185294efd5afe294661876a56ce",
+  "SOURCE-COMMIT": "ddbe2f9b9c55511107b9195925f4eaf8b8edabfe1d65a953bb548d2687c34500",
+  "scripts/download_copernicus.py": "b8e51053d691f62786f98ffdde1ed20ab177d6a00fbe7b3b58d9535e3db0e465",
+  "scripts/audit_copernicus.py": "711a35ddead65d896e27419206ce5839b1b40c721cb2fc35c687f91b3e747b59",
+  "scripts/download-copernicus.sh": "04750b081bc2baa1ae6e861772f64a3d99d2560247397f632e7581d910b38f76",
+  "scripts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "infrastructure/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "infrastructure/copernicus_fields.py": "90bf5bcd2d9e092f57ab9f8450c98f4ae209c2cccc55366471108aa7970237e1"
+}

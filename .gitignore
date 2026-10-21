@@ -1,0 +1,26 @@
+# Loggar, cache och genererad output
+logs/
+cache/
+archive/
+published-urls.log
+published-urls-*.log.gz
+
+# Körtidsfiler
+*.lock
+tmux.sock
+runner.pid
+handoff.session
+*.exit
+
+# Python
+__pycache__/
+*.pyc
+
+# Redigeringsfiler
+*.swp
+*~
+
+# Kodx/agent-config (lokal)
+.agents/
+.aws/
+.codex/

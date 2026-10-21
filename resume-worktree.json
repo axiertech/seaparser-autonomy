@@ -1,0 +1,12 @@
+{
+  "commit": "563f56af93914a63143bfcc2481e455ee29e75df",
+  "branch": "development/real-map-data",
+  "files": {
+    "deployment/VINGA.md": "55e80d3c306096f94e6be4f942b8f980ff35d0db997301621bda75aa07f9a29d",
+    "deployment/activate-poc-api.sh": "c08e01af7f1b7075ffbad13ef7ca56e6953b1a05190f8ba3d2ff0f0c84bcea8e",
+    "deployment/activate-vinga.sh": "b237da769c23631cf4616aee4984d1e1708f1f9a37dcadc67a199b3deabab3ab",
+    "deployment/poc_api.py": "1a508ab15680aa5d46ff9990660299fe07d7cbdaa7a6ccf2cdad2871bfcd9487",
+    "deployment/rollback-vinga.sh": "118e855fedbdca50a6defc021e111ac2f3496e2a14dc44c5df6a8adc71145e4d"
+  },
+  "created_at": "2026-10-19T11:29:54.610284+00:00"
+}

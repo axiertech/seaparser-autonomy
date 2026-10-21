@@ -1,0 +1,13 @@
+{
+  "old_workdir": "/tmp/seaparser-real-map-data",
+  "new_workdir": "/home/web/seaparser/worktrees/real-map-data",
+  "gitdir": "/home/web/seaparser/app/.git/worktrees/seaparser-real-map-data",
+  "commit": "563f56af93914a63143bfcc2481e455ee29e75df",
+  "index_sha256": "b6f772be1a0605cf15edd948dc99dc3d3fc9fe1c9d4ff169fb00a1a55a8acad8",
+  "proof_hashes": {
+    "/home/web/seaparser/autonomy/logs/ssh-probe-bd5600c/latest.json": "14f718d70c976d8ba9123a6a76c22ef5c6a98e8242dd115dadec9dc269ad71c7",
+    "/home/web/seaparser/autonomy/logs/codex-start-probe/latest/status.json": "bcf2c6d1ae736208890117ee3e70378f4c9b7fe6ea28021527da8cf5ad9c4285"
+  },
+  "verified_at": "2026-10-19T11:29:53.932143+00:00",
+  "note": "Git relocation verified; original SSH transport proof retained, no new SSH-disconnect test claimed"
+}

@@ -1,0 +1,8 @@
+{
+  "backup": "/home/web/seaparser/backups/worktree-recovery-20261019T111737Z",
+  "status": "SOURCE_RECOVERED_TARGET_BLOCKED_BY_DIRECTORY_PERMISSION",
+  "target": "/home/web/seaparser/worktrees/real-map-data",
+  "restored_to_target": false,
+  "preflight_verified": false,
+  "locks": "released"
+}
