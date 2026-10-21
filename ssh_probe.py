@@ -3,20 +3,81 @@ import fcntl
 import json
 import os
 import pwd
-from pathlib import Path
 import shlex
 import subprocess
 import sys
 import time
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+from work_session import load_autonomy_conf
+
+# Deliberately not loaded at import time: importing this module must never
+# touch autonomy.conf, so a missing or broken config cannot break the probe
+# before it has logged anything. main() fills this in via load_conf(), which
+# falls back to the hardcoded defaults when the file is missing or invalid.
+# load_autonomy_conf is imported at module level so tests can patch the lookup
+# source; load_conf() still catches its errors so a broken config or a broken
+# work_session cannot kill the probe before START is logged.
+_CONF = None
+
+COMMIT = 'bd5600c602a8896dbfbcf6b185729ce44483d2e4'
+BRANCH = 'development/real-map-data'
 
 BASE = Path('/home/web/seaparser/autonomy')
 WORKDIR = Path('/home/web/seaparser/worktrees/real-map-data')
-COMMIT = 'bd5600c602a8896dbfbcf6b185729ce44483d2e4'
-BRANCH = 'development/real-map-data'
 SOCKET = BASE / 'tmux.sock'
 SESSION = 'seaparser-autonomy-probe'
 LOGDIR = BASE / 'logs/ssh-probe-bd5600c'
+
+
+def conf_value(key, default, conf=None):
+    """Look up KEY in autonomy.conf, warning on stderr when it is missing.
+
+    Args:
+        key: Config key name.
+        default: Value used when the key is absent.
+        conf: Config dict to read; defaults to the module-level _CONF.
+
+    Returns:
+        The configured value, or default.
+    """
+    values = _CONF if conf is None else conf
+    if not values or key not in values:
+        print(f'VARNING: {key} saknas i autonomy.conf, anvander default', file=sys.stderr)
+        return default
+    return values[key]
+
+
+def load_conf(path=None):
+    """Load autonomy.conf and derive the configurable module constants.
+
+    A missing or unparsable config never aborts the probe: the error is
+    reported on stderr and every constant keeps its hardcoded default, so a
+    START/END/EXIT_CODE log is still written. The same holds when
+    work_session itself cannot be imported.
+
+    Args:
+        path: Optional explicit config path; defaults to autonomy.conf next to
+            work_session.py.
+
+    Returns:
+        The parsed config dict (empty when the file could not be read), also
+        stored in the module-level _CONF.
+    """
+    global _CONF, BASE, WORKDIR, SOCKET, SESSION, LOGDIR
+    try:
+        _CONF = load_autonomy_conf(path)
+    except (OSError, ValueError, ImportError) as error:
+        print(f'VARNING: autonomy.conf kunde inte lasas ({error}), anvander default',
+              file=sys.stderr)
+        _CONF = {}
+    BASE = Path(conf_value('BASE', str(BASE)))
+    WORKDIR = Path(conf_value('WORKDIR', str(WORKDIR)))
+    SOCKET = Path(conf_value('SOCKET', str(BASE / 'tmux.sock')))
+    SESSION = conf_value('PROBE_SESSION', SESSION)
+    LOGDIR = BASE / conf_value('LOGDIR', f'logs/ssh-probe-{COMMIT[:7]}')
+    return _CONF
 
 
 def utc():
@@ -151,13 +212,26 @@ def launch():
         return 1
 
 
+def main(argv=None):
+    """Load autonomy.conf, then run the worker or the launcher.
+
+    Args:
+        argv: Argument list; defaults to sys.argv.
+
+    Returns:
+        Process exit code.
+    """
+    argv = sys.argv if argv is None else argv
+    load_conf()
+    if len(argv) == 3 and argv[1] == '--worker':
+        return worker(argv[2])
+    return launch()
+
+
 if __name__ == '__main__':
     os.umask(0o077)
     try:
-        if len(sys.argv) == 3 and sys.argv[1] == '--worker':
-            code = worker(sys.argv[2])
-        else:
-            code = launch()
+        code = main()
     except Exception as error:
         print('PROBE_FAILED: ' + str(error), file=sys.stderr)
         code = 1
