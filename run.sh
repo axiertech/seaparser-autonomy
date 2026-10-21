@@ -1,9 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 umask 077
-BASE=/home/web/seaparser/autonomy
-WORKDIR=/home/web/seaparser/worktrees/real-map-data
-CODEX=/home/web/seaparser/.local/bin/codex
+# Shared constants (BASE, WORKDIR, CODEX, ...) live in autonomy.conf next to
+# this script. Refuse to run without it rather than falling back to defaults.
+CONF="$(dirname -- "${BASH_SOURCE[0]}")/autonomy.conf"
+if [[ ! -f "$CONF" || ! -r "$CONF" ]]; then
+    echo "FEL: $CONF saknas eller är inte läsbar" >&2
+    exit 78
+fi
+# shellcheck source=autonomy.conf
+. "$CONF"
 MODE=${1:?probe eller work}
 END_AT=${2:?explicit sluttid krävs, ISO-8601}
 SESSION_ID=${3:-}
