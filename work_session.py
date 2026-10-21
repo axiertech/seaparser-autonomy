@@ -501,6 +501,11 @@ def stop_process(child, event, deadline, clock=time.monotonic, sleep=time.sleep)
 
 def worker(directory, budget=18000, execute=None, check=preflight, mode='codex-work', resume_state=None):
     directory = Path(directory)
+    # Resolve the mandatory SSH_HEAD/HEAD pins now, before any checkpoint
+    # or preflight call uses them. Tests pass check=lambda:... so preflight()
+    # is never called and resolve_pins() would otherwise never run.
+    global SSH_HEAD, HEAD
+    SSH_HEAD, HEAD = resolve_pins()
     state = {'mode': mode, 'status': 'preflight', 'session_id': None, 'model': MODEL,
              'workdir': str(WORK), 'codex_process_started': False, 'exit_code': 1,
              'policy_version': POLICY_VERSION, 'usage_retry_policy': USAGE_POLICY_VERSION,
