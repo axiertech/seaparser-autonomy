@@ -30,3 +30,6 @@ AUTONOMOUS_TASK.md
 RUN_HISTORY.json
 RUN_REPORT_*.md
 .runner.lock
+
+# Task files for run_many.sh (local only)
+tasks/
