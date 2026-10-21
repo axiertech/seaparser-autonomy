@@ -17,7 +17,7 @@ flock -n 9 || exit 75
 RUN_ID=$(date -u +%Y%m%dT%H%M%SZ)-$$
 LOG="$BASE/logs/$RUN_ID.log"
 exec >>"$LOG" 2>&1
-finish() { rc=$?; trap - EXIT; printf 'END=%s EXIT_CODE=%s\n' "$(date -u +%FT%TZ)" "$rc"; printf '%s\n' "$rc" >"$BASE/logs/$RUN_ID.exit"; if [[ -f "$BASE/runner.pid" && $(cat "$BASE/runner.pid") == "$$" ]]; then rm -- "$BASE/runner.pid"; fi; }
+finish() { rc=$?; trap - EXIT; printf 'END=%s EXIT_CODE=%s\n' "$(date -u +%FT%TZ)" "$rc"; printf '%s\n' "$rc" >"$BASE/logs/$RUN_ID.exit"; if [[ -x "$BASE/update-status.sh" ]]; then "$BASE/update-status.sh" || echo "varning: update-status.sh misslyckades" >&2; fi; if [[ -f "$BASE/runner.pid" && $(cat "$BASE/runner.pid") == "$$" ]]; then rm -- "$BASE/runner.pid"; fi; }
 trap finish EXIT
 printf 'START=%s MODE=%s PID=%s CWD=%s SESSION_ID=%s END_AT=%s\n' "$(date -u +%FT%TZ)" "$MODE" "$$" "$WORKDIR" "$SESSION_ID" "$END_AT"
 printf '%s\n' "$$" >"$BASE/runner.pid"
