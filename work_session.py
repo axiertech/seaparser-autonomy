@@ -46,21 +46,216 @@ def load_autonomy_conf(path=None):
     return values
 
 
+CONF_PATH = Path(__file__).parent / 'autonomy.conf'
+# Deliberately not loaded at import time: importing this module must never
+# depend on the contents or trust state of autonomy.conf. conf() fills this in
+# lazily on first use.
+_CONF = None
+
+
+def conf():
+    """Return the parsed autonomy.conf, loading it lazily on first use.
+
+    The file is read once per process and cached in the module global _CONF;
+    edits to autonomy.conf during a running pass are deliberately ignored so
+    that a pass cannot change its own pins mid-flight. Use reload_conf() to
+    pick up changes explicitly.
+
+    Returns:
+        Dict mapping each KEY to its raw string value.
+    """
+    global _CONF
+    if _CONF is None:
+        _CONF = load_autonomy_conf(CONF_PATH)
+    return _CONF
+
+
+def reload_conf():
+    """Drop the cached config so the next conf() call re-reads autonomy.conf.
+
+    Returns:
+        The freshly parsed config dict.
+    """
+    global _CONF
+    _CONF = None
+    return conf()
+
+
+def conf_value(key, default):
+    """Look up KEY in autonomy.conf, warning on stderr when it is missing.
+
+    Used for values that have a safe built-in default. The module-level
+    constants (MODEL, REASONING, CODEX, SOCKET, SESSION, PROBE_ROOT, LOGROOT)
+    are resolved once at import time from the same cached config; the
+    security-sensitive paths among them (CODEX, SOCKET, PROBE_ROOT, LOGROOT)
+    only accept their default because verify_trusted_config() then enforces
+    ownership and mode on the resolved path before any launch.
+
+    Args:
+        key: Config key name.
+        default: Value used when the key is absent.
+
+    Returns:
+        The configured value, or default.
+    """
+    values = conf()
+    if key not in values:
+        print(f'VARNING: {key} saknas i autonomy.conf, anvander default', file=sys.stderr)
+        return default
+    return values[key]
+
+
+def conf_required(key):
+    """Return a mandatory config value, refusing to fall back to a default.
+
+    Args:
+        key: Config key name.
+
+    Returns:
+        The configured value.
+
+    Raises:
+        ValueError: If the key is missing from autonomy.conf.
+    """
+    values = conf()
+    if key not in values:
+        raise ValueError(f'{key} saknas i autonomy.conf; vagra gissa en pin')
+    return values[key]
+
+
+def current_uid():
+    """Return the uid of the running process.
+
+    Wrapped in a module-level function so tests can patch the lookup without
+    mutating the shared os module process-wide.
+
+    Returns:
+        The effective uid as an int.
+    """
+    return os.getuid()
+
+
+def check_trusted_path(path, label):
+    """Fail closed unless path is owned by the run user and not group/world-writable.
+
+    Args:
+        path: File or directory to inspect.
+        label: Name used in the error message.
+
+    Raises:
+        ValueError: If the path is missing, has another owner, or is
+            group/world-writable.
+    """
+    path = Path(path)
+    try:
+        info = path.stat()
+    except FileNotFoundError:
+        raise ValueError(f'{label} saknas: {path}') from None
+    if info.st_uid != os.getuid():
+        raise ValueError(f'{label} ags inte av korande anvandare: {path}')
+    if info.st_mode & 0o022:
+        raise ValueError(f'{label} ar grupp-/varldsskrivbar: {path}')
+
+
+def ensure_private_dir(path, label):
+    """Create path with mode 0700 if missing, then verify it is trusted.
+
+    The first run of a fresh checkout has no PROBE_ROOT/LOGROOT yet, so the
+    directory is created under umask 077 before the ownership/mode check.
+
+    Args:
+        path: Directory to create and verify.
+        label: Name used in error messages.
+
+    Raises:
+        ValueError: If the directory cannot be created or fails the check.
+    """
+    path = Path(path)
+    previous = os.umask(0o077)
+    try:
+        path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    finally:
+        os.umask(previous)
+    check_trusted_path(path, label)
+
+
+def verify_trusted_config():
+    """Verify ownership/mode of autonomy.conf and every security-sensitive path.
+
+    PROBE_ROOT and LOGROOT are created with private permissions when missing
+    so that the very first run is not blocked by their absence.
+
+    Raises:
+        ValueError: If any trusted path fails check_trusted_path.
+    """
+    check_trusted_path(CONF_PATH, 'autonomy.conf')
+    check_trusted_path(CODEX, 'CODEX')
+    check_trusted_path(SOCKET.parent, 'SOCKET-katalog')
+    ensure_private_dir(PROBE_ROOT, 'PROBE_ROOT')
+    ensure_private_dir(LOGROOT, 'LOGROOT')
+
+
 BASE = Path('/home/web/seaparser/autonomy')
 WORK = Path('/home/web/seaparser/worktrees/real-map-data')
-SSH_HEAD = 'bd5600c602a8896dbfbcf6b185729ce44483d2e4'
-HEAD = '563f56af93914a63143bfcc2481e455ee29e75df'
 POLICY_VERSION = 'capacity-retry-v1'
 USAGE_POLICY_VERSION = 'usage-wait-v2'
 TIMEOUT_POLICY_VERSION = 'sequential-timeout-v1'
 SID = '01a1338f-97d4-7b61-aa78-5fdff31d1f89'
-MODEL = 'gpt-6.1-sol'
-REASONING = 'medium'
-CODEX = '/home/web/seaparser/.local/bin/codex'
-SOCKET = BASE / 'tmux.sock'
-SESSION = 'seaparser-autonomy-work'
-PROBE_ROOT = BASE / 'logs/codex-start-probe'
-LOGROOT = BASE / 'logs/work-five-hours'
+class UnresolvedPin:
+    """Sentinel for a mandatory pin that has not been resolved yet.
+
+    Any attempt to use the value (comparison, string conversion, hashing)
+    raises ValueError instead of silently behaving like a valid pin.
+    """
+
+    def _refuse(self, *_args, **_kwargs):
+        raise ValueError('Pin not resolved; call resolve_pins() first')
+
+    __eq__ = __ne__ = __lt__ = __le__ = __gt__ = __ge__ = _refuse
+    __str__ = __repr__ = __hash__ = __bool__ = _refuse
+
+
+# Pins are mandatory: an unknown or stale pin must never be treated as valid.
+# They are resolved lazily by resolve_pins() so that importing this module
+# never depends on the contents of autonomy.conf. Until then they hold an
+# UnresolvedPin sentinel that raises on any use.
+SSH_HEAD = UnresolvedPin()
+HEAD = UnresolvedPin()
+MODEL = conf_value("MODEL", "gpt-6.1-sol")
+REASONING = conf_value("REASONING", "medium")
+# CODEX is the executable spawned for every turn. autonomy.conf is sourced as
+# shell code, so this path must be owned by the run user (seaparser) and must
+# not be group- or world-writable; otherwise another account could point it at
+# an arbitrary binary that runs with our rights. verify_trusted_config()
+# enforces this before any launch.
+CODEX = conf_value("CODEX", "/home/web/seaparser/.local/bin/codex")
+# SOCKET is the tmux socket used to launch workers. It must live in a
+# directory owned by the run user and not be group/world-writable, so that no
+# other account can pre-create or hijack the socket and inject commands.
+# verify_trusted_config() enforces this before any launch.
+SOCKET = Path(conf_value("SOCKET", str(BASE / 'tmux.sock')))
+SESSION = conf_value("SESSION", "seaparser-autonomy-work")
+PROBE_ROOT = Path(conf_value("PROBE_ROOT", str(BASE / 'logs/codex-start-probe')))
+# LOGROOT holds the run receipts and status files that gate later passes. It
+# must be owned by the run user and not group/world-writable, otherwise
+# another account could forge a successful probe/status and unlock work.
+# verify_trusted_config() enforces this before any launch.
+LOGROOT = Path(conf_value("LOGROOT", str(BASE / 'logs/work-five-hours')))
+
+
+def resolve_pins():
+    """Resolve the mandatory SSH_HEAD/HEAD pins from autonomy.conf.
+
+    Called from preflight()/launch() instead of at import time so that
+    importing this module never depends on the contents of autonomy.conf.
+
+    Returns:
+        Tuple of (ssh_head, head) as configured strings.
+
+    Raises:
+        ValueError: If either pin is missing from autonomy.conf.
+    """
+    return conf_required('SSH_HEAD'), conf_required('HEAD')
 
 
 def now():
@@ -94,7 +289,23 @@ def proof_workdir_verified(value,source):
 
 
 def preflight():
+    """Kor forsta sakerhetskontroller och verifiera SSH-bevis.
+
+    Verifies the run user, the trusted config paths, the pinned SSH-disconnect
+    receipt, the worktree commit/branch, the preserved handoff hashes and the
+    saved ChatGPT login.
+
+    Returns:
+        Dict with the initial run metadata recorded in status.json.
+
+    Raises:
+        PermissionError: If not running as seaparser.
+        ValueError: If any preflight check fails.
+    """
+    global SSH_HEAD, HEAD
     user_check()
+    verify_trusted_config()
+    SSH_HEAD, HEAD = resolve_pins()
     proof = json.loads((BASE/'logs/ssh-probe-bd5600c/latest.json').read_text())
     if not (proof['mode'] == 'ssh-disconnect-proof' and proof['exit_code'] == 0
             and proof['ssh_persistence_verified'] is True
@@ -624,6 +835,22 @@ def check_resume():
 
 
 def launch(probe=False,resume=False):
+    """Verify trusted config, then start a worker in a detached tmux session.
+
+    Args:
+        probe: Start the short git-status probe worker instead of a work pass.
+        resume: Resume the previous finished pass instead of starting a new one.
+
+    Returns:
+        0 when the Codex process started, 1 when the start was unconfirmed.
+
+    Raises:
+        RuntimeError: If tmux fails to start or the worker ends immediately.
+        ValueError: If the trusted config or the start checks fail.
+    """
+    global SSH_HEAD, HEAD
+    verify_trusted_config()
+    SSH_HEAD, HEAD = resolve_pins()
     info = check_resume() if resume else check_start(probe)
     root = PROBE_ROOT if probe else LOGROOT
     session = SESSION
