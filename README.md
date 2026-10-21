@@ -146,3 +146,20 @@ Prepare a task in `~/autonomy/AUTONOMOUS_TASK.md` and run:
 Verify and merge with:
 
     .venv/bin/python -B -m scripts.verify_run --root autonomy <date>_<n> --fast
+
+## Known issue fixed 2026-10-21: verify_cmd masked test failures
+
+Between run 12 (D2) and run 14 (D4) the autonomy verify_cmd piped
+unittest through tail without pipefail, so a failing test suite was
+reported as passing. D2 and D3 were merged while
+test_capacity_retry.WorkerIntegration was broken (7 failures).
+
+Root cause of the test failures: worker() used SSH_HEAD/HEAD without
+calling resolve_pins(), and the UnresolvedPin sentinels raise on any
+use. The checkpoint() helper inside worker() hit this first.
+
+Both are fixed. The verify_cmd now has 'set -o pipefail', and
+worker() calls resolve_pins() at the top before any checkpoint.
+
+Lesson: a verification step that itself can fail silently is worse
+than no verification. Always check the exit code of pipelines.
